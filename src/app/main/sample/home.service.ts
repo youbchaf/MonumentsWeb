@@ -29,6 +29,16 @@ export class HomeService {
     return this.http.get(environment.apiUrl+`/MonumentProjetWS/type`)
   }
 
+  addComment(param) {
+    let options = {
+      headers: new HttpHeaders().set(
+          'Content-Type',
+          'application/json'
+      )
+    };
+    return this.http.post(environment.apiUrl+`/MonumentProjetWS/commentaire/add`,param,options)
+  }
+
 
   searchMon(param) {
     let data = {

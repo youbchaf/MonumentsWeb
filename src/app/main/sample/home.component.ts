@@ -6,6 +6,7 @@ import {DomSanitizer, SafeUrl} from "@angular/platform-browser";
 import {HomeService} from "./home.service";
 import {SwiperConfigInterface} from "ngx-swiper-wrapper";
 import {MapInfoWindow, MapMarker} from "@angular/google-maps";
+import * as http from "http";
 
 @Component({
   selector: 'app-home',
@@ -17,8 +18,10 @@ export class HomeComponent implements OnInit {
 
   public contentHeader: object
   public monuments: [];
-  public photos: [];
+  public commentaires: [];
 
+  public photos: [];
+  public vote:boolean;
   public monument:any;
 
 
@@ -166,7 +169,7 @@ export class HomeComponent implements OnInit {
     let photo : any = this.photos.filter((f:any) => {
       return f.monument.id === this.monument.id
     })
-    console.log(photo)
+
     return photo
   }
 
@@ -195,5 +198,32 @@ export class HomeComponent implements OnInit {
   }
   openInfoe(marker: MapMarker) {
     this.infoWindow.open(marker);
+  }
+  upVote() {
+    this.vote = true
+  }
+  downVote() {
+    this.vote = false
+  }
+
+  addComment() {
+    let user = document.getElementById("nom") as HTMLInputElement
+    let contenu = document.getElementById("commentaire") as HTMLTextAreaElement
+    let comment = {
+      nom:user.value,
+      contenu:contenu.value,
+      vote:this.vote,
+      monument:this.monument.id
+    }
+
+    this.service.addComment(comment).subscribe((data:any) => {
+          this.commentaires = data
+        },
+        error => {
+          console.log(error)
+        }
+    )
+
+
   }
 }
