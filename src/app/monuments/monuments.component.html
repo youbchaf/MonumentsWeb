@@ -1,0 +1,251 @@
+<div class="content-wrapper container-xxl p-0">
+    <div class="content-body">
+        <!-- content-header component -->
+        <app-content-header [contentHeader]="contentHeader"></app-content-header>
+
+        <!-- Basic Alerts start -->
+        <section id="home-page">
+            <div class="row">
+
+
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 class="card-title">Chercher Monuments</h4>
+                        </div>
+                        <div class="card-body pb-1">
+
+                            <form class="form">
+                                <div class="row">
+                                    <div class="col-md-6 col-12">
+                                        <div class="form-group">
+                                            <label for="villes">Villes</label>
+                                            <select class="form-control" id="ville" >
+                                                <option selected value="">All</option>
+                                                <option *ngFor="let v of villes">{{v.nom}}</option>
+
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 col-12">
+                                        <div class="form-group">
+                                            <label for="zones">Zones</label>
+                                            <select class="form-control" id="zone">
+                                                <option selected  value="">All</option>
+
+                                                <option *ngFor="let z of allzone">{{z.nom}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 col-12">
+                                        <div class="form-group">
+                                            <label for="types">Types</label>
+                                            <select class="form-control" id="type">
+                                                <option selected value="">All</option>
+
+                                                <option *ngFor="let t of types">{{t.libelle}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 col-12">
+                                        <div class="form-group">
+                                            <label for="createur">Createur</label>
+
+                                            <select class="form-control" id="creator">
+                                                <option selected value="">All</option>
+
+                                                <option *ngFor="let c of creators">{{c.nom}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 col-12">
+                                        <div class="form-group">
+                                            <label for="date">Date de creation</label>
+
+                                            <div class="input-group">
+                                                <input class="form-control" placeholder="yyyy-mm-dd"
+                                                    name="Basic Date Picker" id="date" [(ngModel)]="basicDPdata"
+                                                    ngbDatepicker #basicDP="ngbDatepicker">
+                                                <div class="input-group-append">
+                                                    <button class="btn btn-outline-secondary feather icon-calendar"
+                                                        (click)="basicDP.toggle()" type="button" rippleEffect></button>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6 col-12">
+                                        <div class="form-group">
+                                            <label for="nom">Nom de monument</label>
+                                            <input type="text" id="nom" class="form-control"
+                                                placeholder="Nom de monument" />
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <button (click)="search()" type="submit" rippleEffect class="btn btn-primary mr-1"><i
+                                                data-feather="search" ></i></button>
+                                        <button type="reset" rippleEffect class="btn btn-outline-secondary"><i
+                                                data-feather="refresh-ccw"></i></button>
+                                    </div>
+                                </div>
+                            </form>
+
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="table-responsive">
+                            <table class="table">
+                              <thead>
+                                <tr>
+                                  <th>Nom</th>
+                                  <th>Rank</th>
+                                  <th>Heure Ouvert</th>
+                                  <th>Heure Fermer</th>
+                                  <th>Weekends</th>
+                                  <th>Actions</th>
+                                </tr>
+                              </thead>
+                              <tbody *ngIf="monuments">
+                                <tr *ngFor="let m of monuments">
+                                 <td>{{m.nom}}</td>
+                                 <td>{{m.rank}}</td>
+                                 <td>{{m.heure_open}}</td>
+                                 <td>{{m.heure_close}}</td>
+                                 <td *ngIf="m.week">Ouvert</td>
+                                    <td *ngIf="!m.week">Fermé</td>
+
+                                    <td class="overflow-hidden">
+                                    <div ngbDropdown container="body">
+                                      <button type="button" class="btn btn-sm hide-arrow" ngbDropdownToggle data-toggle="dropdown">
+                                        <i data-feather="more-vertical"></i>
+                                      </button>
+                                      <div ngbDropdownMenu>
+                                          <a (click)="modalDetail(modalD,m)" ngbDropdownItem href="javascript:void(0);">
+                                              <i data-feather="trash" class="mr-50"></i><span>Details</span></a>
+                                      </div>
+                                    </div>
+                                  </td>
+                                </tr>
+                              </tbody>
+                            </table>
+                          </div>
+                    </div>
+                    <!-- Google Maps Marker with Tooltip Component -->
+                    <google-map [zoom]="markerZoom" width="100%" [center]="markerCentere">
+                        <!-- [title]="marker.title" -->
+                        <map-marker
+                            #markerElem
+                            *ngFor="let marker of markerse"
+                            [label]="marker.label"
+                            [position]="marker.position"
+                            [options]="marker.options"
+                            (mapClick)="openInfoe(markerElem)"
+                        >
+                        </map-marker>
+                        <map-info-window *ngFor="let marker of markerse" [position]="marker.position"
+                        >Hello Google Maps</map-info-window
+                        >
+                    </google-map>
+                    <!--/ Google Maps Marker with Tooltip Component -->
+
+                </div>
+            </div>
+        </section>
+        <!-- Basic Alerts end -->
+    </div>
+</div>
+<!-- Modal -->
+<ng-template #modalD let-modal>
+    <div class="modal-header">
+        <h5 class="modal-title" id="myModalLabel10">Details</h5>
+        <button type="button" class="close" (click)="modal.dismiss('Cross click')" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body" tabindex="0" ngbAutofocus>
+        <div class="row" *ngIf="monument">
+            <div class="col-md-6">
+
+                <div class="d-flex flex-wrap my-50">
+                    <div class="user-info-title">
+                        <i data-feather="command" class="mr-1"></i>
+                        <span class="card-text user-info-title font-weight-bold mb-0">Description :</span>
+                    </div>
+                    <p class="card-text mb-0 ml-1">   {{monument.description }}</p>
+                </div>
+                <div class="d-flex flex-wrap my-50">
+                    <div class="user-info-title">
+                        <i data-feather="circle" class="mr-1"></i>
+                        <span class="card-text user-info-title font-weight-bold mb-0">Type :</span>
+                    </div>
+                    <p class="card-text mb-0 ml-1">   {{monument.type.libelle   }}  </p>
+                </div>
+
+                <div class="d-flex flex-wrap my-50">
+                    <div class="user-info-title">
+                        <i data-feather="clock" class="mr-1"></i>
+                        <span class="card-text user-info-title font-weight-bold mb-0">dateCreation :</span>
+                    </div>
+                    <p class="card-text mb-0 ml-1">{{monument.dateCreation  }}</p>
+                </div>
+                <div class="d-flex flex-wrap my-50">
+                    <div class="user-info-title">
+                        <i data-feather="flag" class="mr-1"></i>
+                        <span class="card-text user-info-title font-weight-bold mb-0">Creator :</span>
+                    </div>
+                    <p class="card-text mb-0 ml-1">{{monument.creator.nom }}</p>
+                </div>
+
+
+
+            </div>
+            <div class="col-md-6">
+
+
+                <div class="d-flex flex-wrap my-50">
+                    <div class="user-info-title">
+                        <i data-feather="map" class="mr-1"></i>
+                        <span class="card-text user-info-title font-weight-bold mb-0">Zone :</span>
+                    </div>
+                    <p class="card-text mb-0 ml-1">{{monument.zone.nom }}</p>
+
+
+                </div>
+                <div class="d-flex flex-wrap my-50">
+                    <div class="user-info-title">
+                        <i data-feather="droplet" class="mr-1"></i>
+                        <span class="card-text user-info-title font-weight-bold mb-0">Ville :</span>
+                    </div>
+                    <p class="card-text mb-0 ml-1">{{monument.zone.ville.nom }}</p>
+
+
+                </div>
+                <div class="d-flex flex-wrap my-50">
+                    <div class="user-info-title">
+                        <i data-feather="map-pin" class="mr-1"></i>
+                        <span class="card-text user-info-title font-weight-bold mb-0">Latitude :</span>
+                    </div>
+                    <p class="card-text mb-0 ml-1">  {{monument.latitude }} </p>
+                </div>
+                <div class="d-flex flex-wrap my-50">
+                    <div class="user-info-title">
+                        <i data-feather="map-pin" class="mr-1"></i>
+                        <span class="card-text user-info-title font-weight-bold mb-0">longitude :</span>
+                    </div>
+                    <p class="card-text mb-0 ml-1"> {{monument.longitude }} </p>
+
+                </div>
+
+
+            </div>
+        </div>
+
+    </div>
+    <div class="modal-footer">
+
+        <button type="button" class="btn btn-primary" (click)="modal.close('Accept click')" rippleEffect>
+            Routeur
+        </button>
+    </div>
+</ng-template>
+<!-- / Modal -->
