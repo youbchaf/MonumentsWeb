@@ -20,7 +20,7 @@
                                     <div class="col-md-6 col-12">
                                         <div class="form-group">
                                             <label for="villes">Villes</label>
-                                            <select class="form-control" id="ville" >
+                                            <select class="form-control" id="ville" (change)="selectZone($event)" >
                                                 <option selected value="">All</option>
                                                 <option *ngFor="let v of villes">{{v.nom}}</option>
 
@@ -33,7 +33,7 @@
                                             <select class="form-control" id="zone">
                                                 <option selected  value="">All</option>
 
-                                                <option *ngFor="let z of allzone">{{z.nom}}</option>
+                                                <option *ngFor="let z of zones">{{z.nom}}</option>
                                             </select>
                                         </div>
                                     </div>
@@ -84,7 +84,7 @@
                                     <div class="col-12">
                                         <button (click)="search()" type="submit" rippleEffect class="btn btn-primary mr-1"><i
                                                 data-feather="search" ></i></button>
-                                        <button type="reset" rippleEffect class="btn btn-outline-secondary"><i
+                                        <button (click)="reset()" type="reset" rippleEffect class="btn btn-outline-secondary"><i
                                                 data-feather="refresh-ccw"></i></button>
                                     </div>
                                 </div>
@@ -130,6 +130,8 @@
                             </table>
                           </div>
                     </div>
+
+
                     <!-- Google Maps Marker with Tooltip Component -->
                     <google-map [zoom]="markerZoom" width="100%" [center]="markerCentere">
                         <!-- [title]="marker.title" -->
@@ -142,11 +144,15 @@
                             (mapClick)="openInfoe(markerElem)"
                         >
                         </map-marker>
+                        <map-polyline [options]="polylineOptions">
+
+                        </map-polyline>
                         <map-info-window *ngFor="let marker of markerse" [position]="marker.position"
                         >Hello Google Maps</map-info-window
                         >
                     </google-map>
                     <!--/ Google Maps Marker with Tooltip Component -->
+
 
                 </div>
             </div>

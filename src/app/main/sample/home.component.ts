@@ -1,12 +1,11 @@
 import {Component, OnInit, ViewChild} from '@angular/core'
-import {MonumentsService} from "../../monuments/monuments.service";
 import {FormBuilder} from "@angular/forms";
 import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
 import {DomSanitizer, SafeUrl} from "@angular/platform-browser";
 import {HomeService} from "./home.service";
 import {SwiperConfigInterface} from "ngx-swiper-wrapper";
 import {MapInfoWindow, MapMarker} from "@angular/google-maps";
-import * as http from "http";
+
 
 @Component({
   selector: 'app-home',
@@ -19,10 +18,12 @@ export class HomeComponent implements OnInit {
   public contentHeader: object
   public monuments: [];
   public commentaires: [];
-
+  public users: [];
+  public commentaire :any [];
   public photos: [];
-  public vote:boolean;
+  public vote:boolean = true;
   public monument:any;
+  public newUser : any[] = []
 
 
   // Lifecycle Hooks
@@ -52,6 +53,12 @@ export class HomeComponent implements OnInit {
     }
     this.getMon()
     this.getPhoto()
+    this.getComments()
+    this.getUsers()
+
+
+
+
   }
   sanitizeImageUrl(imageUrl: string): SafeUrl {
     return this.sanitizer.bypassSecurityTrustUrl(imageUrl);
@@ -64,10 +71,10 @@ export class HomeComponent implements OnInit {
             console.log(data)
               this.monuments = data
               this.monuments.forEach((monument:any)=>{
-                this.markerCentere.lat = monument.latitude,
-                    this.markerCentere.lng = monument.longitude,
+                this.markerCenter.lat = monument.latitude,
+                    this.markerCenter.lng = monument.longitude
 
-                    this.markerse.push(
+                    this.markers.push(
                         {
                           position: {
                             lat: monument.latitude,
@@ -107,12 +114,14 @@ export class HomeComponent implements OnInit {
     this.getMon()
     this.modalService.open(modalLG, {
       centered: true,
-      size: 'lg'
+      size: 'xl'
     });
   }
   modalDetail(modalD, m:any) {
     console.log(m)
     this.monument = m;
+    this.retrieveComment()
+
     this.markerCenter.lat = this.monument.latitude,
         this.markerCenter.lng = this.monument.longitude,
         this.markers = []
@@ -131,10 +140,9 @@ export class HomeComponent implements OnInit {
 
     this.modalService.open(modalD, {
       centered: true,
-      size: 'lg'
+      size: 'xl'
     });
   }
-
   public swiperCoverflow: SwiperConfigInterface = {
     effect: 'coverflow',
     grabCursor: true,
@@ -151,7 +159,6 @@ export class HomeComponent implements OnInit {
       el: '.swiper-pagination'
     }
   };
-
   getPhotos(id:any):string{
     let photo:any
     if(this.photos)
@@ -161,42 +168,33 @@ export class HomeComponent implements OnInit {
       })
     }
 
+    if(photo)
     return photo[0]?.url
   }
-
-
   getPhotoss():any{
-    let photo : any = this.photos.filter((f:any) => {
-      return f.monument.id === this.monument.id
-    })
+    let photo : any
+    if(this.monument){
+      photo  = this.photos.filter((f:any) => {
+        return f.monument.id === this.monument.id
+      })
+    }
+
 
     return photo
   }
-
-
   @ViewChild(MapInfoWindow, { static: false }) infoWindow: MapInfoWindow;
-
   public markerZoom = 12;
   public streetZoom = 12;
   public markerCenter: google.maps.LatLngLiteral = {
     lat: 0,
     lng: 0
   };
-  public markerCentere: google.maps.LatLngLiteral = {
-    lat: 0,
-    lng: 0
-  };
 
   public markers: object[] = [
-
   ];
-  public markerse: object[] = [
 
-  ];
-  openInfo(marker: MapMarker) {
-    this.infoWindow.open(marker);
-  }
-  openInfoe(marker: MapMarker) {
+
+  openInfo(marker) {
     this.infoWindow.open(marker);
   }
   upVote() {
@@ -205,7 +203,6 @@ export class HomeComponent implements OnInit {
   downVote() {
     this.vote = false
   }
-
   addComment() {
     let user = document.getElementById("nom") as HTMLInputElement
     let contenu = document.getElementById("commentaire") as HTMLTextAreaElement
@@ -218,6 +215,8 @@ export class HomeComponent implements OnInit {
 
     this.service.addComment(comment).subscribe((data:any) => {
           this.commentaires = data
+          this.getComments()
+          this.getUsers()
         },
         error => {
           console.log(error)
@@ -226,4 +225,64 @@ export class HomeComponent implements OnInit {
 
 
   }
+  getComments(){
+
+    this.service.getComment()
+        .subscribe((data:any) => {
+
+              this.commentaires = data
+
+
+            },
+            error => {
+              console.log(error)
+            }
+        )
+  }
+  getUsers(){
+    this.service.getUser()
+        .subscribe((data:any) => {
+
+              this.users = data
+              this.retrieveComment()
+
+            },
+            error => {
+              console.log(error)
+            }
+        )
+  }
+  retrieveComment(){
+
+    if(this.monument && this.commentaires)
+    this.commentaire = this.commentaires.filter((c:any)=>{
+      return c.pk.monument === this.monument.id
+
+    })
+
+    if(this.commentaire)
+    this.commentaire.forEach((e,i) => {
+        this.users.forEach((e1:any,i1) =>{
+          if(e1.id === e.pk.user){
+            this.newUser.push(e1)
+          }
+
+        })
+    })
+
+  }
+
+  getCommentUser(c:any):any{
+
+    if(this.users){
+      let userInfo =  this.users.find((s:any)=>{
+        return s.id === c.pk.user
+      })
+      return userInfo
+    }
+
+  }
+
+
+
 }

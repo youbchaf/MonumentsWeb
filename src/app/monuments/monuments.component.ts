@@ -3,6 +3,7 @@ import {NgbDateStruct, NgbModal} from '@ng-bootstrap/ng-bootstrap';
 import {MonumentsService} from "./monuments.service";
 import {FormBuilder} from "@angular/forms";
 import {MapInfoWindow, MapMarker} from "@angular/google-maps";
+import MapTypeId = google.maps.MapTypeId;
 
 @Component({
   selector: 'app-monuments',
@@ -20,11 +21,30 @@ export class MonumentsComponent implements OnInit {
   public villes: [];
   public creators: [];
   public monument:any;
+  source: google.maps.LatLngLiteral
+  destination:google.maps.LatLngLiteral
+  map : google.maps.Map
+    center: google.maps.LatLngLiteral
+    options: google.maps.MapOptions = {
+      mapTypeId: google.maps.MapTypeId.ROADMAP,
+        scrollwheel:true,
+        disableDefaultUI:true,
+        disableDoubleClickZoom:true,
+        zoom:16
+    }
+    ds: google.maps.DirectionsService
+    dr: google.maps.DirectionsRenderer
+    polylineOptions = {
+        path: [],
+        strokeColor: '#32a1d0',
+        strokeOpacity: 1.0,
+        strokeWeight: 2,
+    };
 
-  
-  constructor(private service:MonumentsService, private fb:FormBuilder,private modalService: NgbModal) { }
+    constructor(private service:MonumentsService, private fb:FormBuilder,private modalService: NgbModal) { }
 
   ngOnInit(): void {
+
     this.contentHeader = {
       headerTitle: 'Monuments',
       actionButton: true,
@@ -48,9 +68,80 @@ export class MonumentsComponent implements OnInit {
     this.getZone()
     this.getVille()
     this.getCreator()
+    navigator.geolocation.getCurrentPosition(position => {
+        this.center= {
+            lat:position.coords.latitude,
+            lng:position.coords.longitude
+        }
 
+        this.destination = {
+            lat: 31.6237776,
+            lng: -7.9941399
+        }
+        this.source = {
+            lat : 37.42206,
+            lng:-7.9941399
+        }
+        this.map = new google.maps.Map(document.getElementById("map-canvas"),{
+            ...this.options,
+            center:this.center
+        })
+
+        let markerStart = new google.maps.Marker({
+            position: this.center,
+
+
+            map: this.map
+        })
+        let markerDestination = new google.maps.Marker({
+            position: this.destination,
+            map: this.map
+        })
+        var destinationmarker =
+        this.ds = new google.maps.DirectionsService()
+        this.dr = new google.maps.DirectionsRenderer({
+            map:null,
+            suppressMarkers:true
+        })
+
+        let request= {
+            origin:this.source,
+            destination:this.destination,
+            travelMode: google.maps.TravelMode.DRIVING
+        }
+        this.ds.route(request,(response,status)=>{
+            this.dr.setOptions({
+                suppressPolylines:false,
+                map:this.map
+            });
+            if(status == google.maps.DirectionsStatus.OK){
+                this.dr.setDirections(response);
+            }
+        })
+
+
+
+    })
+
+      this.service.getLocationService().then(resp=>{
+
+          this.markerCentere.lat =  resp.lat
+          this.markerCentere.lng = resp.lng
+
+          this.markerse.push(
+              {
+                  position: {
+                      lat: resp.lat,
+                      lng: resp.lng
+                  },
+                  options: {
+                      draggable: false
+                  },
+                  label: "Current location"
+              }
+          )
+      })
   }
-
   getMon(){
 
     this.service.getMon()
@@ -129,9 +220,6 @@ export class MonumentsComponent implements OnInit {
             }
         )
   }
-
-
-
   modalOpenLG(modalLG) {
     this.getMon()
     this.modalService.open(modalLG, {
@@ -139,7 +227,6 @@ export class MonumentsComponent implements OnInit {
       size: 'lg'
     });
   }
-
   modalDetail(modalD, m:any) {
     this.monument = m;
     this.modalService.open(modalD, {
@@ -171,6 +258,24 @@ export class MonumentsComponent implements OnInit {
             .subscribe((data:any) => {
                     console.log(data)
                     this.monuments = data
+                    this.markerse = []
+                    this.monuments.forEach((monument:any)=>{
+                        this.markerCentere.lat = monument.latitude,
+                            this.markerCentere.lng = monument.longitude,
+
+                            this.markerse.push(
+                                {
+                                    position: {
+                                        lat: monument.latitude,
+                                        lng: monument.longitude
+                                    },
+                                    options: {
+                                        draggable: false
+                                    },
+                                    label: monument.nom
+                                }
+                            )
+                    })
                 },
                 error => {
                     console.log(error)
@@ -178,7 +283,7 @@ export class MonumentsComponent implements OnInit {
             )
 
     }
-    /*
+
     selectZone(x) {
         this.zones = this.allzone.filter(zone=>{
             return x.target.value === zone.ville.nom
@@ -186,7 +291,7 @@ export class MonumentsComponent implements OnInit {
         console.log(this.zones)
     }
 
-     */
+
 
     @ViewChild(MapInfoWindow, { static: false }) infoWindow: MapInfoWindow;
 
@@ -203,5 +308,9 @@ export class MonumentsComponent implements OnInit {
 
     openInfoe(marker: MapMarker) {
         this.infoWindow.open(marker);
+    }
+
+    reset() {
+        this.getMon()
     }
 }

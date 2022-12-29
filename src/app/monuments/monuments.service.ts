@@ -54,4 +54,12 @@ export class MonumentsService {
     };
     return this.http.post(environment.apiUrl+`/MonumentProjetWS/Monument/search`,param,options)
   }
+
+  getLocationService():Promise<any> {
+    return new Promise((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(resp => {
+        resolve({lng: resp.coords.longitude, lat: resp.coords.latitude})
+      })
+    })
+  }
 }

@@ -38,7 +38,12 @@ export class HomeService {
     };
     return this.http.post(environment.apiUrl+`/MonumentProjetWS/commentaire/add`,param,options)
   }
-
+  getComment() {
+    return this.http.get(environment.apiUrl+`/MonumentProjetWS/Commentaire`)
+  }
+  getUser() {
+    return this.http.get(environment.apiUrl+`/MonumentProjetWS/users`)
+  }
 
   searchMon(param) {
     let data = {
@@ -67,5 +72,15 @@ export class HomeService {
       )
     };
     return this.http.post(environment.apiUrl+`/MonumentProjetWS/Monument/search`,param,options)
+  }
+
+
+
+  getLocationService():Promise<any> {
+    return new Promise((resolve, reject) => {
+      navigator.geolocation.getCurrentPosition(resp => {
+        resolve({lng: resp.coords.longitude, lat: resp.coords.latitude})
+      })
+    })
   }
 }
