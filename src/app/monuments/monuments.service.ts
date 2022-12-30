@@ -25,6 +25,10 @@ export class MonumentsService {
     return this.http.get(environment.apiUrl+`/MonumentProjetWS/type`)
   }
 
+  getComment() {
+    return this.http.get(environment.apiUrl+`/MonumentProjetWS/Commentaire`)
+  }
+
 
   searchMon(param) {
     let data = {

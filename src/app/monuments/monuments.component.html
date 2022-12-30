@@ -108,7 +108,7 @@
                               <tbody *ngIf="monuments">
                                 <tr *ngFor="let m of monuments">
                                  <td>{{m.nom}}</td>
-                                 <td>{{m.rank}}</td>
+                                 <td>{{getMonRank(m)}}</td>
                                  <td>{{m.heure_open}}</td>
                                  <td>{{m.heure_close}}</td>
                                  <td *ngIf="m.week">Ouvert</td>
@@ -141,7 +141,7 @@
                             [label]="marker.label"
                             [position]="marker.position"
                             [options]="marker.options"
-                            (mapClick)="openInfoe(markerElem)"
+                            (mapClick)="openInfoe(marker.position)"
                         >
                         </map-marker>
                         <map-polyline [options]="polylineOptions">

@@ -40,11 +40,12 @@ export class MonumentsComponent implements OnInit {
         strokeOpacity: 1.0,
         strokeWeight: 2,
     };
+    private commentaires: any[];
 
     constructor(private service:MonumentsService, private fb:FormBuilder,private modalService: NgbModal) { }
 
   ngOnInit(): void {
-
+      this.getComments()
     this.contentHeader = {
       headerTitle: 'Monuments',
       actionButton: true,
@@ -237,8 +238,10 @@ export class MonumentsComponent implements OnInit {
 
     search() {
       console.log("search")
+        let ville = ''
         let zone = document.getElementById("zone") as HTMLSelectElement
-        let ville = document.getElementById("ville") as HTMLSelectElement
+        if(zone.value==='')
+            ville = (document.getElementById("ville") as HTMLSelectElement).value
         let type = document.getElementById("type") as HTMLSelectElement
         let creator = document.getElementById("creator") as HTMLSelectElement
         let date = document.getElementById("date") as HTMLInputElement
@@ -247,7 +250,7 @@ export class MonumentsComponent implements OnInit {
 
         let SearchMonument = {
           "zone":zone.value,
-                "ville":ville.value,
+                "ville":ville,
                 "type":type.value,
                 "creator":creator.value,
                 "nom":nom.value
@@ -301,16 +304,44 @@ export class MonumentsComponent implements OnInit {
         lat: 31.6239008,
         lng: -7.993831
     };
+    getComments(){
 
+        this.service.getComment()
+            .subscribe((data:any) => {
+
+                    this.commentaires = data
+
+
+                },
+                error => {
+                    console.log(error)
+                }
+            )
+    }
     public markerse: object[] = [
 
     ];
 
-    openInfoe(marker: MapMarker) {
-        this.infoWindow.open(marker);
+    openInfoe(marker) {
+
+        window.location.replace(`https://www.google.com/maps/search/?api=1&query=${marker.lat},${marker.lng}`)
     }
 
     reset() {
         this.getMon()
+    }
+
+    getMonRank(m:any):number{
+
+        let rank = 0
+
+        if( this.commentaires)
+        this.commentaires.forEach((c:any)=>{
+            if(c.pk.monument===m.id){
+                if(c.vote) rank++
+                else rank--
+            }
+        })
+        return rank
     }
 }

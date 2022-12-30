@@ -195,7 +195,7 @@ export class HomeComponent implements OnInit {
 
 
   openInfo(marker) {
-    this.infoWindow.open(marker);
+    window.location.replace(`https://www.google.com/maps/search/?api=1&query=${marker.lat},${marker.lng}`)
   }
   upVote() {
     this.vote = true
